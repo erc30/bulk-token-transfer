@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+   <!-- head -->
+   <head>
+      <!-- Latest compiled and minified CSS -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+      <!-- Parastate CSS -->
+      <link rel="stylesheet" href="../css/style.css">
+      <!-- jQuery library -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <!-- Latest compiled JavaScript -->
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+      <!-- Parastate JS -->
+      <script src="../js/script.js"></script>
+      <!-- web3 for blockchain interaction -->
+      <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+      <!-- XLSX -->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.14.3/xlsx.full.min.js"></script>
+      <script>
+         $(document).ready(function(){
+            console.log("Page has loaded ...");
+             window.newSpreadsheet = new SPREADSHEET();
+             //window.newReport = new REPORT();
+             window.newSender = new SENDER();
+             window.newReady = new READY();
+             window.newBlockchain = new BLOCKCHAIN();
+             window.newDataset = new DATASET();
+             //window.newStorageSuccess = new STORAGE();
+             //window.newStorageFailure = new STORAGE();
+             window.newDeduper = new DEDUPER();
+             window.newContract = new CONTRACT()
+             process_spreadsheet();
+
+         });
+      </script>
+      <title>Bulk token transfer</title>
+   </head>
+   <!-- body -->
+   <body>
+      <!-- container -->
+      <div id="outer" class="container">
+         <div id="title" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Bulk token transfer</h1>
+            </div>
+         </div>
+         <div id="message" class="warning_text form-row text-center">
+            <div class="col-sm-12 spacer">
+               <b>Warning: this is in alpha. Please only use on testnet for now</b>
+            </div>
+         </div>
+         <!-- ChainId -->
+         <div id="init" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Initialize provider</h1>
+               <b>RPC</b>
+               <br />Please enter RPC endpoint and then press the Initialize RPC button.
+               <br />
+               CMT Testnet
+               <input id="initialize_rpc_input" type="text" class="full_width spacer center_text" value="https://testnet.cmtwallet.io:8545"/>
+               <br />
+               <b>Chain Id</b>
+               <br />Please add chainId below before proceeding (i.e. CMT MainNet is 18, CMT TestNet is 19)
+               <br />
+               <input id="initialize_chainid_input" type="text" class="full_width spacer center_text" value="19"/>
+               <br />
+               <br />
+               <!--
+                Ropsten testnet  
+               <input id="initialize_rpc_input" type="text" class="full_width spacer center_text" value="https://ropsten.infura.io/v3/0920fdea265848a9b49dd72674c088a7"/>
+               <br />
+               <br />
+               <b>Chain Id</b>
+               <br />Please add chainId below before proceeding (i.e. CMT MainNet is 18, CMT TestNet is 19)
+               <br />
+               <input id="initialize_chainid_input" type="text" class="full_width spacer center_text" value="3"/>
+               <br />
+               <br />
+            -->
+               
+               <button type="button" class="btn btn-primary btn-sm spacer" id="initialize_rpc" onclick="initialize_rpc();">Initialize RPC</button>
+               <div id="initialize_rpc_output" class="full_width spacer center_text"></div>
+               <div id="initialize_rpc_output_2" class="full_width spacer center_text"></div>
+               <div id="initialize_rpc_output_3" class="full_width spacer center_text"></div>
+               <div id="initialize_rpc_output_4" class="full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Contract owner -->
+         <div id="owner" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Contract owner/sender of funds</h1>
+                  <p>Please paste in private and public keys for the account which will be responsible for deploying the contract and in addition sending network tokens to the recipient accounts.</p>
+                  <br />
+                  <p><b>Important: Always use a brand new account EVERY TIME you transfer tokens!</b> This is because we are exposing the private key here, and in addition all transfers will be written to the blockchain's event logs (whilst being indexed to this account address). Using a new account each time is robust; re-using an existing account is never recommended because that will end up being troublesome.</p>
+                  <br />
+                  <p><b>Please ensure you have the private key saved!</b> because only the owner of the contract (which we are about to deploy) can perform any of the smart contract function calls.
+                  <br />
+                  <b>Private key</b>
+                  <input id="private_key_input" type="text" class="full_width spacer center_text" value=""/>
+                  <br />
+                  <br />
+                  <b>Public key</b>
+                  <input id="public_key_input" type="text" class="full_width spacer center_text" value=""/>
+                  <br />
+                  <br />
+
+         <!-- Contract -->
+         <div id="deploy" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Deploy smart contract (optional)</h1>
+               <p>If you have already deployed the contract and have an address, please proceed to the next step where you paste your address in (which will, of course, instantiate your existing contract).</p>
+               <p>If you have not deployed a contract, please go ahead and push the button.</p>
+
+               <button type="button" class="btn btn-primary btn-sm spacer" id="deploy_contract" onclick="deploy_contract();">Deploy New Contract</button>
+               <br />
+               <b>If you deployed a new contract, please save the contract address (shown below) so that you can paste it in next time (as apposed to deploying a new contract every time).</b>
+               <br />
+               <br />
+               <div id="deploy_contract_output" class="full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+
+         <!-- Contract -->
+         <div id="initialize_contract" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Initialize smart contract</h1>
+
+               <br />Please enter the smart contract address and click "Initialize Existing Contract"<br />
+               <br />
+               <input id="initialize_contract_input" type="text" class="full_width spacer center_text" value=""/>
+               <br />
+               <button type="button" class="btn btn-primary btn-sm spacer" id="initialize_contract" onclick="initialize_contract();">Initialize Existing Contract</button>
+               <br />
+              <div id="initialize_contract_output" class="full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+
+
+         <div id="pk" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Upload spreadsheet</h1>
+               <label class="centercontent full_width spacer center_text" for="avatar">Choose .xlsx file:</label>
+               <input class="centercontent full_width spacer center_text" type="file" id="docpicker" accept=".csv,application/vnd.ms-excel,.xlt,application/vnd.ms-excel,.xla,application/vnd.ms-excel,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,.xltx,application/vnd.openxmlformats-officedocument.spreadsheetml.template,.xlsm,application/vnd.ms-excel.sheet.macroEnabled.12,.xltm,application/vnd.ms-excel.template.macroEnabled.12,.xlam,application/vnd.ms-excel.addin.macroEnabled.12,.xlsb,application/vnd.ms-excel.sheet.binary.macroEnabled.12">
+               <div id="spreadsheet_output" class="textarea full_width spacer center_text"></div>
+               <br />
+               <b>Please highlight the text above, then copy and paste into a new file called normalized_data.json</b>. The reason being, we have validated and normalized the original data. This is now the original data and we need a backup of this for later use (in the event that only some of the transactions succeed, we can run a script over this normalized data and then remove addresses which did succeed in the first pass. This allows us to run the bulk transfer again and again without doubling up on already successful transfers).
+               Here is one we prepared earlier <a href=https://github.com/second-state/bulk-token-transfer/blob/main/data/normalized_data.json target=_blank>normalized_data.json.</a>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Override data -->
+         <div id="override_data" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Override in-memory data? (optional)</h1>
+               <p>Only override in-memory data if you are re-processing a previously failed run of transactions. Otherwise, move to the next section.</p>
+                  <br />
+                  <br />
+                  <b>Data to override the current in-memory data can be pasted into the following text box</b><p>For example, if you have identified unsettled transfers (using the "Identify unsettled transfers" tool at the very bottom of this page).
+                  <input id="override_data_input" type="text" class="full_width spacer center_text" value="" maxlength="10000000">
+                  <br />
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="override_data" onclick="overrideInMemoryData();">Override in-memory data</button>
+               <div id="override_data_output" class="textarea full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         
+         <!-- Pre check for duplicates--> 
+         <!-- Turns out these are not that much of an issue, there are only a small percentage -->
+
+         <div id="pre_check_for_duplicates" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Remove duplicate addresses (consolidate amounts)</h1>
+               <p>Duplicate addresses are not ideal. It would be beter to consolidate.
+                  <br />
+                  <br />
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="pre_check_for_duplicates" onclick="preCheckForDuplicateAddresses();">Remove duplicate addresses and consolidate amounts</button>
+               <div id="pre_check_output_for_duplicate_addresses" class="textarea full_width spacer center_text"></div>
+               <br />
+               <b>Similarly, to above, you can copy and paste this deduped dataset into a new file called deduped_normalized_data.json</b>. The reason being, you can now use this as the master dataset so that we save on the amount of blockchain transactions we need to perform. Each address still gets the right amount (because we consolidated the values)
+               Here is one we prepared earlier <a href=https://github.com/second-state/bulk-token-transfer/blob/main/data/deduped_normalized_data.json target=_blank>deduped_normalized_data.json.</a>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+
+         <!-- Pre check -->
+         <div id="pre_check" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Pre check balances</h1>
+               <p>This will test to see if the private/public key pair which you pasted in above (the owner of the contract who will be sending the amounts also) has enough funds.
+
+                  <br />
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="pre_check" onclick="preCheck();">Pre check balances</button>
+               <div id="pre_check_output" class="full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Add private key -->
+         <div id="transfer_tokens_div" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Transfer tokens</h1>
+               <p>Please <b>check the token addresses and amounts</b> displayed above ...<br />
+                  If satisfied, then click "... Transfer Tokens" button.
+               </p>
+               <br />
+               <br />
+               <button type="button" class="btn btn-primary btn-sm spacer" id="transfer_tokens" onclick="transferTokens();">I have checked the addresses above, Transfer Tokens!</button>
+               <div id="transfer_tokens_output" class="full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Read event logs fast-->
+         <div id="read_event_logs_fast" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Read event logs (FAST)</h1>
+               <p>Please paste in public key for the sender/payer (same a Public Key above) account.
+                  <br />
+                  <p>This (FAST) function will fetch all event logs in a single RPC request (which may exceed your RPC provider's rate limiting. For example, Infura will not allow over 1000 results to be returned from a single RPC request.
+                  <br />
+                  <b>Public key</b>
+                  <input id="read_event_logs_input_fast" type="text" class="full_width spacer center_text" value=""/>
+                  <br />
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="read_event_logs_button" onclick="readEventLogsFast();">Read event logs (FAST)</button>
+               <div id="read_event_logs_output_fast" class="textarea full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Read event logs -->
+         <div id="read_event_logs" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Read event logs (SLOW)</h1>
+               <p>Please paste in public key for the sender/payer (same a Public Key above) account.
+                  <br />
+                  This (SLOW) function will fetch event logs sequentially (return one result at a time)
+                  <br />
+                  <b>Public key</b>
+                  <input id="read_event_logs_input_slow" type="text" class="full_width spacer center_text" value=""/>
+                  <br />
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="read_event_logs_button" onclick="readEventLogs();">Read event logs (SLOW)</button>
+               <div id="read_event_logs_output_slow" class="textarea full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Get balance of any account -->
+         <div id="get_balance" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Get random's account balance</h1>
+               <p>Please paste in public key if you would like to see an account balance
+                  <br />
+                  <br />
+                  <b>Public key</b>
+                  <input id="get_balance_input" type="text" class="full_width spacer center_text" value=""/>
+                  <br />
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="get_balance_button" onclick="getRandomsBalance();">Get balance</button>
+               <div id="get_balance_output" class="textarea full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+
+         <!-- Show pending transfers -->
+         <div id="identify_unsettled_transfers" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Identify unsettled transfers</h1>
+               <p>This section will automatically use the original (deduped) dataset from above (so please load a spreadsheet and press dedupe button above if you haven't already).
+                  <br />
+                  <br />
+                  <b>Next, please paste in the data from the read event logs section above (essentially pasting in all of the known successful transfers to date)</b>
+                  <input id="event_log_data_input" type="text" class="full_width spacer center_text" value="" maxlength="10000000">
+                  <br />
+                  <button type="button" class="btn btn-primary btn-sm spacer" id="override_data" onclick="identifyUnsettledTransfers();">Identify unsettled transfers</button>
+               <div id="unsettled_data_output" class="textarea full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+         <!-- Withdraw tokens -->
+         <div id="withdraw_tokens_div" class="form-row text-center">
+            <div class="col-sm-12 spacer">
+               <h1>Withdraw tokens</h1>
+               <p>This will return any lingering tokens which are sitting in the contract (only the owner can call this and the tokens will only be returned to the owner's external account address).
+               </p>
+               <br />
+               <br />
+               <button type="button" class="btn btn-primary btn-sm spacer" id="transfer_tokens" onclick="withdrawTokens();">Withdraw Tokens</button>
+               <div id="withdraw_tokens_output" class="full_width spacer center_text"></div>
+               <hr class="mt-2 mb-3"/>
+            </div>
+         </div>
+         <br />
+
+         <!-- container -->
+      </div>
+   </body>
+</html>
