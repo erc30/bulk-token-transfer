@@ -368,7 +368,7 @@ function deploy_contract() {
                                                 console.log("Unable to get transaction receipt " + err);
                                             }
                                         });
-                                    }, 10000);
+                                    }, 60000);
 
                                 } else {
                                     console.log("*\nSend signed transaction failed: " + error);
@@ -542,7 +542,7 @@ function activateTestMode() {
     var newArr = [];
     var amountToProcess = arr.length;
     for (let i = 0; i < arr.length; i++) {
-        var a = new web3.utils.BN("1000000000000");
+        var a = new web3.utils.BN("10000000000000");
         aa = [arr[i][0], a.toString()];
         newArr.push(aa);
         aa = [];
@@ -673,7 +673,7 @@ function preCheck() {
         requiredBalance = requiredBalance.add(temp_num);
     }
     console.log("Total amount to be transfered: " + requiredBalance.toString() + " Wei");
-    console.log("Approx: " + web3.utils.fromWei(requiredBalance.toString(), 'ether') + " CMT");
+    console.log("Approx: " + web3.utils.fromWei(requiredBalance.toString(), 'ether') + " Tokens");
     getBalance(newSender.getAddress());
     document.getElementById("pre_check_output").innerHTML = "Calculating balances, please wait ...";
     setTimeout(function() {
