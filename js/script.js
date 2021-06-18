@@ -773,90 +773,121 @@ async function transferTokens() {
     var toAddress = web3.utils.toChecksumAddress(newContract.getAddress());
     var fromAddress = web3.utils.toChecksumAddress(newSender.getAddress());
     //if (typeof(Storage) !== "undefined") {
-        //localStorage.clear();
-        var output_string = "";
-        while (true) {
-            if (!newDataset.isWaiting()) {
-                newDataset.wait();
-                if (!newDataset.isEmpty()) {
-                    var newOneHundredItems = new OneHundredItems();
-                    while(!newOneHundredItems.isReady()){
-                        var data = newDataset.getNextItem();
-                        newOneHundredItems.setAddress(data[0]);
-                        newOneHundredItems.setAmount(data[1]);
+    //localStorage.clear();
+    var output_string = "";
+    while (true) {
+        if (!newDataset.isWaiting()) {
+            newDataset.wait();
+            if (!newDataset.isEmpty()) {
+                var newOneHundredItems = new OneHundredItems();
+                console.log("***Created new one hundred items instance***");
+                while (!newOneHundredItems.isReady()) {
+                    var data = newDataset.getNextItem();
+                    newOneHundredItems.setAddress(data[0]);
+                    newOneHundredItems.setAmount(data[1]);
+                }
+                //var itemForReport = new ITEMFORREPORT();
+                if (newOneHundredItems.isReady()) {
+                    var de = newContract.getContractInstanceObject().methods.bulkSendEth(newOneHundredItems.getAddresses(), newOneHundredItems.getAmounts()).encodeABI();
+                    var toAmount = newOneHundredItems.getTotalValuePerHundred();
+                    //console.log("Transferring a total of : " + toAmount);
+                    try {
+                        web3.eth.getGasPrice(function(error, gas_price) {
+                            console.log("Gas price: " + gas_price);
+                            if (!error) {
+                                web3.eth.getBlock("latest", function(error, block) {
+                                    if (!error) {
+                                        web3.eth.getBalance(fromAddress, function(error, wei) {
+                                            if (!error) {
+                                                // Senders account balance
+                                                console.log("\nSenders account balance:" + web3.utils.fromWei(wei, 'ether'));
+                                                // Other values
+                                                console.log("\nchainId: " + newBlockchain.getChainId());
+                                                console.log("\nfrom: " + fromAddress);
+                                                console.log("\ngasPrice: " + web3.utils.fromWei(gas_price, 'ether'));
+                                                console.log("\ngas: " + web3.utils.fromWei(block.gasLimit.toString(), 'ether'));
+                                                console.log("\nto: " + toAddress);
+                                                console.log("\nvalue: " + web3.utils.fromWei(toAmount, 'ether'));
+                                                //console.log("\ndata: " + de);
+
+                                                web3.eth.estimateGas({
+                                                    chainId: newBlockchain.getChainId(),
+                                                    to: toAddress,
+                                                    data: de,
+                                                    from: newSender.getAddress()
+                                                }, function(error, gasRequired) {
+                                                    if (!error) {
+                                                        console.log("\nSenders account balance:" + web3.utils.fromWei(wei, 'ether'));
+                                                        // Other values
+                                                        console.log("\nchainId: " + newBlockchain.getChainId());
+                                                        console.log("\nfrom: " + fromAddress);
+                                                        console.log("\ngasPrice: " + web3.utils.fromWei(gas_price, 'ether'));
+                                                        console.log("\ngas: " + web3.utils.fromWei(block.gasLimit.toString(), 'ether'));
+                                                        console.log("\nto: " + toAddress);
+                                                        console.log("\nvalue: " + web3.utils.fromWei(toAmount, 'ether'));
+                                                        var transaction_object = {
+                                                            chainId: newBlockchain.getChainId(),
+                                                            from: newSender.getAddress(),
+                                                            gasPrice: gas_price,
+                                                            gas: gasRequired,
+                                                            to: toAddress,
+                                                            value: toAmount,
+                                                            data: de
+                                                        };
+
+                                                        //console.log("\nTransaction object: " + JSON.stringify(transaction_object));
+                                                        web3.eth.accounts.signTransaction(transaction_object, document.getElementById("private_key_input").value, function(error, signed_tx) {
+                                                            if (!error) {
+                                                                web3.eth.sendSignedTransaction(signed_tx.rawTransaction, function(error, sent_tx) {
+                                                                    if (!error) {
+                                                                        //console.log("\nSent TX: " + sent_tx);
+                                                                        waitBlock(signed_tx.transactionHash, toAddress, toAmount);
+                                                                    } else {
+                                                                        console.log("*\nSend signed transaction failed: " + error);
+                                                                        newDataset.go();
+                                                                    }
+                                                                });
+                                                            } else {
+                                                                console.log(error);
+                                                            }
+                                                        });
+                                                    } else {
+                                                        console.log("Unable to get gas required: " + error);
+                                                    }
+                                                });
+
+                                            } else {
+                                                console.log("Unable to get balance: " + error);
+                                            }
+                                        });
+                                    } else {
+                                        console.log("Unable to get block: " + error)
+                                    }
+                                });
+
+                            } else {
+                                console.log(error);
+                            }
+                        });
+                    } catch (err) {
+                        console.log(err);
                     }
-                    //var itemForReport = new ITEMFORREPORT();
-                    if (newOneHundredItems.isReady()) {
-                        var de = newContract.getContractInstanceObject().methods.bulkSendEth(newOneHundredItems.getAddresses(), newOneHundredItems.getAmounts()).encodeABI();
-                        var toAmount = newOneHundredItems.getTotalValuePerHundred();
-                        //console.log("Transferring a total of : " + toAmount);
-                        try {
-                            web3.eth.getGasPrice(function(error, gas_price) {
-                                console.log("Gas price: " + gas_price);
-                                if (!error) {
-                                    web3.eth.getBlock("latest", function(error, block) {
-                                        //console.log("\nchainId" + newBlockchain.getChainId());
-                                        //console.log("\nfrom" + fromAddress);
-                                        //console.log("\ngasPrice" + gas_price);
-                                        //console.log("\ngas" + block.gasLimit);
-                                        //console.log("\nto" + toAddress);
-                                        //console.log("\nvalue" + toAmount);
-                                        //console.log("\ndata" + de);
-                                        if (!error) {
-                                            var transaction_object = {
-                                                chainId: newBlockchain.getChainId(),
-                                                from: newSender.getAddress(),
-                                                gasPrice: gas_price,
-                                                gas: block.gasLimit,
-                                                to: toAddress,
-                                                value: toAmount,
-                                                data: de
-                                            };
-                                            //console.log("\nTransaction object: " + JSON.stringify(transaction_object));
-                                            web3.eth.accounts.signTransaction(transaction_object, document.getElementById("private_key_input").value, function(error, signed_tx) {
-                                                if (!error) {
-                                                    web3.eth.sendSignedTransaction(signed_tx.rawTransaction, function(error, sent_tx) {
-                                                        if (!error) {
-                                                            //console.log("\nSent TX: " + sent_tx);
-                                                            waitBlock(signed_tx.transactionHash, toAddress, toAmount);
-                                                        } else {
-                                                            console.log("*\nSend signed transaction failed: " + error);
-                                                            newDataset.go();
-                                                        }
-                                                    });
-                                                } else {
-                                                    console.log(error);
-                                                }
-                                            });
-
-                                        } else {
-                                            console.log(error);
-                                        }
-                                    });
-
-                                } else {
-                                    console.log(error);
-                                }
-                            });
-                        } catch (err) {
-                            console.log(err);
-                        }
-                        newOneHundredItems.flush();
-                    } else {
-                        console.log("Still adding items ..." + JSON.stringify(newOneHundredItems.getAddresses()));
-                        await sleep(1000);
-                    }
-
+                    newOneHundredItems.flush();
                 } else {
-                    console.log("Finished sending transactions");
-                    break;
+                    console.log("Still adding items ..." + JSON.stringify(newOneHundredItems.getAddresses()));
+                    await sleep(1000);
                 }
 
             } else {
-                console.log("Waiting for most recent transaction to be included in a block ...");
-                await sleep(1000);
+                console.log("Finished sending transactions");
+                break;
             }
+
+        } else {
+            console.log("Waiting for most recent transaction to be included in a block ...");
+            await sleep(1000);
         }
+    }
 }
 
 function withdrawTokens() {
