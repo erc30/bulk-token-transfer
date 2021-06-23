@@ -114,29 +114,33 @@ for key, value in depupedDict.items():
     else:
         processingCommenced = True
     print("Processing: {0} {1}".format(key, value))
-    if len(tempListOfTransactionHashes) == 100:
-        confirmTransactions(tempListOfTransactionHashes)
-        tempListOfTransactionHashes = []
-    nonce = w3.eth.get_transaction_count(sendersPublicKey,"pending")
-    print('Nonce: {0}'.format(nonce))
-    if nonce < next_nonce_should_be:
-        print("Waiting for nonce value to catchup")
-        time.sleep(30)
+    if amount >= 1000000000000000000 and amount <= 10000000000000000000000:
+        if len(tempListOfTransactionHashes) == 100:
+            confirmTransactions(tempListOfTransactionHashes)
+            tempListOfTransactionHashes = []
         nonce = w3.eth.get_transaction_count(sendersPublicKey,"pending")
-    print("Using nonce: {0}".format(nonce))
-    transactionObject = {"nonce": nonce, "gas": gasLimit, "gasPrice": gasPrice, "from": sendersPublicKey, "to": key, "value": value, "chainId": blockchainChainId}
-    next_nonce_should_be = nonce + 1
-    print("Transaction object: {0}".format(transactionObject))
-    signedTransaction = w3.eth.account.sign_transaction(transactionObject, sendersPrivateKey)
-    #print('Signed transaction: {0}'.format(signedTransaction))
-    sentTransaction = w3.eth.send_raw_transaction(signedTransaction.rawTransaction)
-    transactionHash = w3.toHex(sentTransaction)
-    tempListOfTransactionHashes.append(transactionHash)
-    tempOuterReportObject = readData(timeOfRunning)
-    tempInnerReportObject = [key, value, transactionHash]
-    tempOuterReportObject.append(tempInnerReportObject)
-    writeData(timeOfRunning, tempOuterReportObject)
-    time.sleep(0.25)
+        print('Nonce: {0}'.format(nonce))
+        if nonce < next_nonce_should_be:
+            print("Waiting for nonce value to catchup")
+            time.sleep(30)
+            nonce = w3.eth.get_transaction_count(sendersPublicKey,"pending")
+        print("Using nonce: {0}".format(nonce))
+        transactionObject = {"nonce": nonce, "gas": gasLimit, "gasPrice": gasPrice, "from": sendersPublicKey, "to": key, "value": value, "chainId": blockchainChainId}
+        next_nonce_should_be = nonce + 1
+        print("Transaction object: {0}".format(transactionObject))
+        signedTransaction = w3.eth.account.sign_transaction(transactionObject, sendersPrivateKey)
+        #print('Signed transaction: {0}'.format(signedTransaction))
+        sentTransaction = w3.eth.send_raw_transaction(signedTransaction.rawTransaction)
+        transactionHash = w3.toHex(sentTransaction)
+        tempListOfTransactionHashes.append(transactionHash)
+        tempOuterReportObject = readData(timeOfRunning)
+        tempInnerReportObject = [key, value, transactionHash]
+        tempOuterReportObject.append(tempInnerReportObject)
+        writeData(timeOfRunning, tempOuterReportObject)
+        time.sleep(0.25)
+    else:
+        print("Amount must be more than 1CMT and less than 10000CMT")
+        continue
 
 if len(tempListOfTransactionHashes) > 0:
     confirmTransactions(tempListOfTransactionHashes)
