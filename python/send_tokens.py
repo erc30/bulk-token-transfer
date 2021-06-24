@@ -98,7 +98,7 @@ for i in range(1, worksheet.max_row+1):
                         depupedDict[recipientAddress] = amount
             except:
                 print('Invalid address: {0}'.format(recipientAddress))
-
+print("***** Deduped list of recipient accounts: {0} ******".format(len(depupedDict)))
 next_nonce_should_be = w3.eth.get_transaction_count(sendersPublicKey,"pending") + 1
 processingCommenced = False
 # Iterate through the dict
@@ -114,7 +114,7 @@ for key, value in depupedDict.items():
     else:
         processingCommenced = True
     print("Processing: {0} {1}".format(key, value))
-    if amount >= 1000000000000000000 and amount <= 10000000000000000000000:
+    if value >= 1000000000000000000 and value <= 10000000000000000000000:
         if len(tempListOfTransactionHashes) == 100:
             confirmTransactions(tempListOfTransactionHashes)
             tempListOfTransactionHashes = []
@@ -122,7 +122,7 @@ for key, value in depupedDict.items():
         print('Nonce: {0}'.format(nonce))
         if nonce < next_nonce_should_be:
             print("Waiting for nonce value to catchup")
-            time.sleep(30)
+            time.sleep(15)
             nonce = w3.eth.get_transaction_count(sendersPublicKey,"pending")
         print("Using nonce: {0}".format(nonce))
         transactionObject = {"nonce": nonce, "gas": gasLimit, "gasPrice": gasPrice, "from": sendersPublicKey, "to": key, "value": value, "chainId": blockchainChainId}
