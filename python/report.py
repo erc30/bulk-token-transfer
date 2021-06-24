@@ -24,7 +24,9 @@ if n == 2:
         formatted_list_array.append([temp_address_url, list_item[1], temp_tx_url])
     index_data = []
     for item in list_array:
-        index_data.append(str(item[0]))
+        temp_string =  str(item[0])
+        cut_string = temp_string[:6] + "..." + temp_string[-6:]
+        index_data.append(cut_string)
 
     # Sample DataFrame
     df = pd.DataFrame(formatted_list_array, columns=['Address', 'Amount', 'Transaction_Hash'], index=index_data)
