@@ -9,13 +9,13 @@ A toolkit to perform 1:N token transfers. Includes:
 
 - The user uploads a spreadsheet (.xlsx file) from their local file system. The spreadsheet contains a list of Ethereum compatible addresses and amounts in wei
 
-### Web3.js
+### Web3.js (HTML/JS)
 
 - The web page sends the relevant amount of tokens which correspond to each of the addresses in the spreadsheet; signing the transactions using the user's private key (which they paste into this DApp locally)
 - Rather than send tokens via separate transactions, this DApp has a built-in smart contract that batches transfers of tokens in lots of 100. 
 - Once tokens are transferred, the smart contract writes the `_to`, `_from` and `_amount` details in to the blockchains storage as evidence of the transfer
 
-### Web3.py
+### Web3.py (Python)
 
 - The Python command send the relevant amounts of tokens which correspond to each of the addresses in the spreadsheet; signing the transactions using the user's private key (which is read from a `conf.ini` file). This method does not suffer from Javascript event loops. Instead it simultaneously sends transactions (up to a certain number i.e. a batch of 100 transfers) and then takes advantage of web3.py's `wait_for_transaction_receipt` which will confirm that batch of 100 before moving on to the next hundred.
 
