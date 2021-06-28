@@ -106,6 +106,8 @@ Now open the `report_transfers.html` file (which was just generated) in your web
 
 ## How to use it via HTML/JS (Web3.js)
 
+TL;DR there is a YouTube video demonstration [here](https://www.youtube.com/watch?v=NnTFIGX8K0U).
+
 **1** 
 
 Clone this repository
