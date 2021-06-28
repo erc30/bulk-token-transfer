@@ -1,16 +1,35 @@
 
 ## Specification
 
-A client-side Web3.js app to bulk transfer coins from one address to many different addresses (no server required)
+A toolkit to perform 1:N token transfers. Includes:
+- a client-side Web3.js (HTML/JS) app to bulk transfer coins from one address to many different addresses (no server required)
+- a Web3.py (Python) command line interface (CLI) to bulk transfer coins from one address to many different addresses
 
 ## How it works
 
 - The user uploads a spreadsheet (.xlsx file) from their local file system. The spreadsheet contains a list of Ethereum compatible addresses and amounts in wei
+
+### Web3.js
+
 - The web page sends the relevant amount of tokens which correspond to each of the addresses in the spreadsheet; signing the transactions using the user's private key (which they paste into this DApp locally)
 - Rather than send tokens via separate transactions, this DApp has a built-in smart contract that batches transfers of tokens in lots of 100. 
 - Once tokens are transferred, the smart contract writes the `_to`, `_from` and `_amount` details in to the blockchains storage as evidence of the transfer
 
-## How to use it
+### Web3.py
+
+- The Python command send the relevant amounts of tokens which correspond to each of the addresses in the spreadsheet; signing the transactions using the user's private key (which is read from a `conf.ini` file). This method does not suffer from Javascript event loops. Instead it simultaneously sends transactions (up to a certain number i.e. a batch of 100 transfers) and then takes advantage of web3.py's `wait_for_transaction_receipt` which will confirm that batch of 100 before moving on to the next hundred.
+
+### Reporting
+
+The Web3.js tool utilizes smart contract event logs to generate data for reporting.
+
+The Web3.py tool uses [pandas](https://pandas.pydata.org/) to generate a comprehensive report as a stand-alone HTML page.
+
+## How to use it via Python CLI (Web3.py)
+
+Please see [the Python instructions here](https://github.com/ParaState/bulk-token-transfer/blob/main/python/README.md)
+
+## How to use it via HTML/JS (Web3.js)
 
 **1** 
 
