@@ -102,7 +102,7 @@ python3 report.py 2021-06-24-13-20-26
 
 Now open the `report_transfers.html` file (which was just generated) in your web browser (no need for hosting, just select `File` - > `Open` in your browser's menu). You will see the following report.
 
-![report]()
+![report](https://github.com/ParaState/bulk-token-transfer/raw/main/Screen%20Shot%202021-06-29%20at%208.15.58%20am.png)
 
 ## How to use it via HTML/JS (Web3.js)
 
