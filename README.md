@@ -17,7 +17,7 @@ A toolkit to perform 1:N token transfers. Includes:
 
 ### Web3.py (Python)
 
-- The Python command send the relevant amounts of tokens which correspond to each of the addresses in the spreadsheet; signing the transactions using the user's private key (which is read from a `conf.ini` file). This method does not suffer from Javascript event loops. Instead it simultaneously sends transactions (up to a certain number i.e. a batch of 100 transfers) and then takes advantage of web3.py's `wait_for_transaction_receipt` which will confirm that batch of 100 before moving on to the next hundred.
+- The Python command send the relevant amounts of tokens which correspond to each of the addresses in the spreadsheet; signing the transactions using the user's private key (which is read from a `config.ini` file). This method does not suffer from Javascript event loops. Instead it simultaneously sends transactions (up to a certain number i.e. a batch of 100 transfers) and then takes advantage of web3.py's `wait_for_transaction_receipt` which will confirm that batch of 100 before moving on to the next hundred.
 
 ### Reporting
 
@@ -53,7 +53,7 @@ Please use an online Wei converter if you need assistance with this.
 
 ### Obtain this code
 
-Download this code i.e. `git clone https://github.com/second-state/bulk-token-transfer.git` then change to the python directory i.e. `cd bulk-token-transfer/python`
+Download this code i.e. `git clone https://github.com/ParaState/bulk-token-transfer.git` then change to the python directory i.e. `cd bulk-token-transfer/python`
 
 ### Configure this code
 
@@ -112,7 +112,7 @@ TL;DR there is a YouTube video demonstration [here](https://www.youtube.com/watc
 
 Clone this repository
 ```
-git clone git@github.com:second-state/bulk-token-transfer.git
+git clone https://github.com/ParaState/bulk-token-transfer.git
 ```
 
 **2**
